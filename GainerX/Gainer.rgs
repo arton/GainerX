@@ -1,0 +1,34 @@
+HKCR
+{
+	GainerX.Gainer.1 = s 'Gainer Class'
+	{
+		CLSID = s '{FB4167A2-2958-4AAA-861D-78E673089973}'
+	}
+	GainerX.Gainer = s 'Gainer Class'
+	{
+		CLSID = s '{FB4167A2-2958-4AAA-861D-78E673089973}'
+		CurVer = s 'GainerX.Gainer.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {FB4167A2-2958-4AAA-861D-78E673089973} = s 'Gainer Class'
+		{
+			ProgID = s 'GainerX.Gainer.1'
+			VersionIndependentProgID = s 'GainerX.Gainer'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			val AppID = s '%APPID%'
+			ForceRemove 'Control'
+			ForceRemove 'ToolboxBitmap32' = s '%MODULE%, 102'
+			'MiscStatus' = s '0'
+			{
+			    '1' = s '%OLEMISC%'
+			}
+			'TypeLib' = s '{F3A76D0B-AB61-491C-961F-267D38A20250}'
+			'Version' = s '1.0'
+		}
+	}
+}

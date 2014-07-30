@@ -1,0 +1,11 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		'%APPID%' = s 'GainerX'
+		'GainerX.ocx'
+		{
+			val AppID = s '%APPID%'
+		}
+	}
+}

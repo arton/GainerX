@@ -1,0 +1,125 @@
+// GainerX.idl : Gainer I/O Module ActiveX Control's Interface definition
+//
+
+#include "olectl.h"
+#include "gxctl.h"
+import "oaidl.idl";
+import "ocidl.idl";
+
+
+[
+	uuid(F3A76D0B-AB61-491C-961F-267D38A20250),
+	version(1.0),
+	helpstring("GainerX I/O module controller")
+]
+library GainerXLib
+{
+    typedef [helpstring("configuration mode (ain/din/aout/dout)")]
+    enum _ConfigMode {
+        [helpstring("initial configuration 0/0/0/0")] INIT_MODE = 0,
+        [helpstring("default configuration 4/4/4/4")] DEFAULT_MODE = 1,
+        [helpstring("8/0/4/4")] MODE_2 = 2,
+        [helpstring("4/4/8/0")] MODE_3 = 3,
+        [helpstring("8/0/8/0")] MODE_4 = 4,
+        [helpstring("0/16/0/0")] DIN_MODE = 5,
+        [helpstring("0/0/0/16")] DOUT_MODE = 6,
+        [helpstring("matrix LED control mode 0/8/8/0")] MATRIX_LED_MODE = 7,
+        [helpstring("capacitive sensing switch mode 0/8/0/8 first 4 ports only")] CAPACITIVE_SENSING_MODE = 8,
+    } GainerConfiguration;
+
+    [
+        object,
+        uuid(6831B355-EDA7-46F8-AD85-14F968FE9FF1),
+        dual,
+        nonextensible,
+        helpstring("IGainer I/O Module Controller"),
+        pointer_default(unique)
+    ]
+    interface IGainer : IDispatch{
+        [propput, bindable, requestedit, id(DISPID_ENABLED)]
+        HRESULT Enabled([in]VARIANT_BOOL vbool);
+        [propget, bindable, requestedit, id(DISPID_ENABLED)]
+        HRESULT Enabled([out,retval]VARIANT_BOOL* pbool);
+        [propput, bindable, requestedit, id(DISPID_VALID)]
+        HRESULT Valid([in]VARIANT_BOOL vbool);
+        [propget, bindable, requestedit, id(DISPID_VALID)]
+        HRESULT Valid([out, retval]VARIANT_BOOL* pbool);
+        [propput, bindable, requestedit, id(DISPID_VISIBLE)]
+        HRESULT Visible([in]VARIANT_BOOL vbool);
+        [propget, bindable, requestedit, id(DISPID_VISIBLE)]
+        HRESULT Visible([out, retval]VARIANT_BOOL* pbool);
+
+        [id(DISPID_OPEN), helpstring("Open the device")]
+        HRESULT Open([in]BSTR device);
+        [id(DISPID_CLOSE), helpstring("Close the device")]
+        HRESULT Close();
+        [id(DISPID_WAIT), helpstring("waiting events for non window program")]
+        HRESULT Wait([in]long Timeout);
+
+        [propput, id(DISPID_CONFIGURATION), helpstring("Set configuration mode")]
+        HRESULT Configuration([in]GainerConfiguration mode);
+        [id(DISPID_REBOOT), helpstring("Reboot Gainer")]
+        HRESULT Reboot();
+
+        [propput, id(DISPID_VERBOSE), helpstring("Set Verbose Mode")]
+        HRESULT Verbose([in]VARIANT_BOOL Enabled);
+        [id(DISPID_VERSION), helpstring("Read version and build number")]
+        HRESULT ReadVersion([out, retval]BSTR* pResult);
+        [propput, id(DISPID_LED), helpstring("Turn the onboard LED")]
+        HRESULT LED([in]VARIANT_BOOL On);
+
+        [id(DISPID_PGA), helpstring("set PGA gain and PGA reference")]
+        HRESULT SetPGA([in]long Gain, [in]long reference);
+
+        [id(DISPID_SET_ALLDIGITALOUTPUTS), helpstring("set all digital outputs")]
+        HRESULT WriteAllDigitalOutputs([in]SAFEARRAY(byte) *NewValue);
+        [id(DISPID_GET_ALLDIGITALINPUTS), helpstring("get all digital inputs (default: read once)")]
+        HRESULT ReadAllDigitalInputs([in, optional]VARIANT ContinuousMode, [out, retval]SAFEARRAY(byte)* ppResult);
+        [id(DISPID_SET_SPECIDIFEDDIGITALOUTPUT), helpstring("set specified digital output")]
+        HRESULT WriteDigitalOutput([in]long Port, [in]VARIANT_BOOL High);
+        [propput, id(DISPID_SET_SENSITIVITY), helpstring("set sensitivity for capacitive sensing inputs")]
+        HRESULT Sensitivity([in]long NewValue);
+        [id(DISPID_SET_ALLANALOGOUTPUTS), helpstring("set all analog outputs")]
+        HRESULT WriteAllAnalogOutputs([in]SAFEARRAY(byte) *NewValue);
+        [id(DISPID_SET_SPECIFIEDANALOGOUTPUT), helpstring("set specified analog input")]
+        HRESULT WriteAnalogOuput([in]long Port, [in]long Value);
+        [id(DISPID_SET_SPECIFIEDANALOGOUTPUT_BY_ROW), helpstring("set specified analog input")]
+        HRESULT WriteAnalogOuputByRow([in]long Row, [in]SAFEARRAY(byte)* Value);
+        [id(DISPID_GET_ALLANALOGINPUTS), helpstring("get all analog inputs (default: read once)")]
+        HRESULT ReadAllAnalogInputs([in, optional]VARIANT ContinuousMode, [out, retval]SAFEARRAY(byte)* ppResult);
+        [id(DISPID_GET_SPECIFIEDANALOGINPUT), helpstring("get specified analog input (continuous mode)")]
+        HRESULT ReadAnalogInput([in]long Port, [out, retval]long* pResult);
+        [id(DISPID_EXIT_CONTINOUS_MODE), helpstring("exit continuous mode")]
+        HRESULT ExitContinousMode();
+        [propput, id(DISPID_SET_AIN_SAMPLINGMODE), helpstring("ain sampling mode, x:mode (0: scan all channles, 1: scan ain 0/4 only)")]
+        HRESULT AinSamplingMode([in]long NewMode);
+    };
+
+    importlib("stdole2.tlb");
+    [
+        uuid(F9FE5F60-5467-4F95-AA58-4B112C024A49),
+        helpstring("_IGainerEvents interface")
+    ]
+    dispinterface _IGainerEvents
+    {
+    properties:
+    methods:
+        [id(1)] void ButtonPressed();
+        [id(2)] void ButtonReleased();
+        [id(3), helpstring("continuous mode only")] void DigitalInputs([in]SAFEARRAY(byte)* NewValue);
+        [id(4), helpstring("continuous mode only")] void AnalogInputs([in]SAFEARRAY(byte)* NewValue);
+        [id(5), helpstring("continuous mode only")] void AnalogInput([in]long NewValue);
+        [id(6), helpstring("communication offline (fatal)")] void Error([in]long Code);
+        [id(7), helpstring("Gainer failed and rebooted (retryable")] void Rebooted();
+    };
+    [
+        uuid(FB4167A2-2958-4AAA-861D-78E673089973),
+        control,
+        helpstring("Gainer Class")
+    ]
+    coclass Gainer
+    {
+        [default] interface IGainer;
+        [default, source] dispinterface _IGainerEvents;
+    };
+};
